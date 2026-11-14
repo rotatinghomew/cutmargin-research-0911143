@@ -1,0 +1,71 @@
+{
+  "lots": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "product": "text",
+      "period": "text",
+      "unit": "text"
+    },
+    "description": "批次代表特定工序阶段的实物，返工后另建阶段批次。采购批次期初量由首个投入量确认；各阶段未流出量是库存。",
+    "references": {}
+  },
+  "operations": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "day": "date",
+      "kind": "text",
+      "sequence": "int"
+    },
+    "description": "加工实际操作，sequence 为本地工序顺序；同一原料名可能多次出现，但阶段编号不混淆。",
+    "references": {}
+  },
+  "flows": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "operation_id": "text",
+      "lot_id": "text",
+      "direction": "text",
+      "quantity": "number"
+    },
+    "description": "物料为正数量，方向为 input、output、loss；loss 是工序损失，不再作为额外投入扣第二遍。",
+    "references": {
+      "operation_id": "operations.id",
+      "lot_id": "lots.id"
+    }
+  },
+  "costs": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "lot_id": "text?",
+      "operation_id": "text?",
+      "amount": "money",
+      "kind": "text",
+      "avoidable": "bool"
+    },
+    "description": "成本只挂批次或工序之一；是否可避免是业务已批准的属性，不等同于财务分摊方式。",
+    "references": {
+      "lot_id": "lots.id",
+      "operation_id": "operations.id"
+    }
+  },
+  "sales": {
+    "key": "id",
+    "columns": {
+      "id": "text",
+      "lot_id": "text",
+      "day": "date",
+      "quantity": "number",
+      "amount": "money",
+      "return_of": "text?"
+    },
+    "description": "销售金额为不含税净额，负数退回指向原销售，退回实物进入原阶段库存；未售库存不是当期损耗。",
+    "references": {
+      "lot_id": "lots.id",
+      "return_of": "sales.id"
+    }
+  }
+}
