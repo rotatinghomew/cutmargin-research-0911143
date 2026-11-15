@@ -4,7 +4,7 @@
 
 ## 目录
 
-`cutmargin/catalog.py` 解析并校验资料，`domain.py` 提供当前经营视图，`profile.py` 提供探索性数值摘要，`cases.py` 保存含资料副本的研究备注，`service.py` 处理 HTTP。`data/` 是可重复使用的虚构经营资料，`tests/` 检查当前接口和领域口径，`smoke.py` 发起真实本地 HTTP 请求后退出。
+`cutmargin/catalog.py` 解析并校验资料，`domain.py` 提供当前经营视图，`bridge.py` 提供可核对回原料批次的收益桥分析（计量闭合、成本流转、分摊口径比较与毛利变动分解），`profile.py` 提供探索性数值摘要，`cases.py` 保存含资料副本的研究备注，`service.py` 处理 HTTP。`data/` 是可重复使用的虚构经营资料，`tests/` 检查当前接口和领域口径，`smoke.py` 发起真实本地 HTTP 请求后退出。收益桥的分析约定见 `docs/bridge.md`。
 
 ## 本机运行
 

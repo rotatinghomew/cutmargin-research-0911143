@@ -2,6 +2,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
+from .bridge import bridge_analysis, lot_bridge
 from .cases import CaseStore
 from .catalog import Catalog
 from .domain import overview
@@ -34,6 +35,14 @@ class Application:
                 return 200, {"source_fingerprint": self.catalog.fingerprint, "view": overview(self.catalog)}
             if method == "GET" and path == "/profiles":
                 return 200, {"source_fingerprint": self.catalog.fingerprint, "profiles": numeric_profiles(self.catalog)}
+            if method == "GET" and path == "/bridge":
+                analysis = bridge_analysis(self.catalog, basis=query.get("basis", ["weight"])[0],
+                                           period_from=query.get("from", [None])[0],
+                                           period_to=query.get("to", [None])[0])
+                return 200, {"source_fingerprint": self.catalog.fingerprint, "analysis": analysis}
+            if method == "GET" and path.startswith("/bridge/lots/"):
+                return 200, {"source_fingerprint": self.catalog.fingerprint,
+                             "lot": lot_bridge(self.catalog, path.split("/")[-1])}
             if method == "GET" and path == "/cases":
                 return 200, {"cases": self.cases.list()}
             if method == "GET" and path.startswith("/cases/"):
@@ -41,9 +50,15 @@ class Application:
             if method == "POST" and path == "/cases":
                 if not isinstance(body, dict):
                     raise ValueError("请求内容应为对象")
-                if set(body) - {"label", "options", "notes"}:
+                if set(body) - {"label", "options", "notes", "analysis"}:
                     raise ValueError("请求包含未知字段")
-                return 201, self.cases.create(self.catalog, body.get("label"), body.get("options"), body.get("notes", ""))
+                analysis = None
+                if "analysis" in body:
+                    if body["analysis"] != "bridge":
+                        raise ValueError("未知分析类型")
+                    analysis = {"kind": "bridge", "result": bridge_analysis(self.catalog)}
+                return 201, self.cases.create(self.catalog, body.get("label"), body.get("options"),
+                                              body.get("notes", ""), analysis)
         except KeyError:
             return 404, {"error": "记录不存在"}
         except (TypeError, ValueError) as error:

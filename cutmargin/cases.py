@@ -15,7 +15,7 @@ class CaseStore:
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=True)
 
-    def create(self, catalog, label, options=None, notes=""):
+    def create(self, catalog, label, options=None, notes="", analysis=None):
         if not isinstance(label, str) or not label.strip() or len(label) > 120:
             raise ValueError("研究名称需为一至一百二十个字符")
         if options is None:
@@ -28,6 +28,8 @@ class CaseStore:
             "source_fingerprint": catalog.fingerprint,
             "tables": {name: catalog.rows(name) for name in catalog.tables},
         }
+        if analysis is not None:
+            payload["analysis"] = analysis
         envelope = {"content": payload, "sha256": hashlib.sha256(canonical(payload)).hexdigest()}
         with (self.directory / (payload["id"] + ".json")).open("xb") as target:
             target.write(canonical(envelope))

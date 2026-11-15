@@ -13,9 +13,12 @@ def main():
         thread.start()
         base = f"http://127.0.0.1:{server.server_port}"
         try:
-            for path in ("/health", "/tables", "/view"):
+            for path in ("/health", "/tables", "/view", "/bridge"):
                 with urlopen(base + path, timeout=5) as response:
                     print(path, json.dumps(json.load(response), ensure_ascii=False))
+            with urlopen(base + "/bridge/lots/B0-fillet", timeout=5) as response:
+                lot = json.load(response)["lot"]
+            print("/bridge/lots/B0-fillet", lot["closure"], lot["margins"]["weight"])
             request = Request(base + "/cases", data=json.dumps({"label": "月度经营讨论", "options": {"period": "2026-09"}}, ensure_ascii=False).encode(), headers={"Content-Type": "application/json"})
             with urlopen(request, timeout=5) as response:
                 created = json.load(response)
